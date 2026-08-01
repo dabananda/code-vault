@@ -38,10 +38,13 @@ jobs:
       # as a secret named PROFILE_DISPATCH_TOKEN (a fine-grained PAT scoped
       # to just that one repo with "Contents: Read and write" is enough).
       - name: Notify dabananda profile repo
-        if: ${{ secrets.PROFILE_DISPATCH_TOKEN != '' }}
         env:
           GH_TOKEN: ${{ secrets.PROFILE_DISPATCH_TOKEN }}
         run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "PROFILE_DISPATCH_TOKEN not set - skipping notification."
+            exit 0
+          fi
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer $GH_TOKEN" \
