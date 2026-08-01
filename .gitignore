@@ -8,6 +8,9 @@
 !*.py
 !*.js
 !*.sql
+!*.yml
+!*.yaml
+!*.md
 !pre-compile_all_cpp_header_files.txt
 !vs_code_custom_settings_for_programming.json
 !sublime_custom_settings_for_programming.json

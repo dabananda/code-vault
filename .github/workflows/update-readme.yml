@@ -1,0 +1,49 @@
+name: Update README Stats
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "problems/**"
+      - "roadmaps/**"
+      - "scripts/update_readme.py"
+
+  workflow_dispatch:
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update README with latest stats
+        run: python scripts/update_readme.py
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: sync problem solving stats"
+
+      # Pings the dabananda/dabananda profile repo so its README refreshes
+      # within seconds instead of waiting for its own daily cron run.
+      # Requires a PAT with `repo` scope on the dabananda repo, stored here
+      # as a secret named PROFILE_DISPATCH_TOKEN (a fine-grained PAT scoped
+      # to just that one repo with "Contents: Read and write" is enough).
+      - name: Notify dabananda profile repo
+        if: ${{ secrets.PROFILE_DISPATCH_TOKEN != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_DISPATCH_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            https://api.github.com/repos/dabananda/dabananda/dispatches \
+            -d '{"event_type":"codevault-updated"}'
